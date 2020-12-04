@@ -35,7 +35,7 @@ import numpy as np
 from sudoku_aux import *
 #%% Functions
        
-def crooks_solver( board ):
+def crook( board ):
     '''
     This function checks if a sudoku board is solvable and, if possible, solves
     it using Crook's algorithm, described in 'A Pencil-and-Paper algorithm
@@ -164,7 +164,7 @@ def crooks_solver( board ):
             
     return( solvable, solution )
     
-def backtrack_solver( board ):
+def backtrack( board ):
     '''
      Solves the game 'board', if possible, using a simple backtracking algorithm
 
