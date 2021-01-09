@@ -35,7 +35,7 @@ import numpy as np
 from sudoku_aux import *
 #%% Functions
        
-def crook( board ):
+def crook( board: np.array = np.zeros( (9,9), dtype = int ) ) -> (bool, np.array):
     '''
     This function checks if a sudoku board is solvable and, if possible, solves
     it using Crook's algorithm, described in 'A Pencil-and-Paper algorithm
@@ -58,11 +58,22 @@ def crook( board ):
 
     '''
     
+    try:
+        board = np.array( board, dtype = int )
+    except:
+        print('Could not convert the entry to an integer array.')
+    
+    if np.max( board ) > 9 or np.min( board ) < 0:
+        raise Exception('Only integer numbers from 0 to 9 are accepted.')
+    
+    height, width = board.shape
+    if height != 9 or width != 9:
+        raise Exception('This is not a 9x9 board.')
+    
     #Checking if there are duplicates in any of the rows, columns
     #or boxes
     if not first_check( board ):
         return( False, board )
-    
     
     #The first thing is to get the initial markup
     markup = get_markup( board )
@@ -164,7 +175,7 @@ def crook( board ):
             
     return( solvable, solution )
     
-def backtrack( board ):
+def backtrack( board: np.array = np.zeros( (9,9), dtype = int ) ) -> (bool, np.array):
     '''
      Solves the game 'board', if possible, using a simple backtracking algorithm
 
@@ -181,6 +192,18 @@ def backtrack( board ):
 
     '''
 
+    try:
+        board = np.int( board )
+    except:
+        print('Could not convert the entry to a integer array.')
+    
+    if np.max( board ) > 9 or np.min( board ) < 0:
+        raise Exception('Only integer numbers from 0 to 9 are accepted.')
+    
+    height, width = board.shape()
+    if height != 9 or width != 9:
+        raise Exception('This is not a 9x9 board.')
+        
     #Check if the initial values contains duplicates in any rows, columns or boxes
     if not check_initial( board ):
         return( False, board )
@@ -218,3 +241,8 @@ def backtrack( board ):
                 current_zero += 1
 
     return( solvable, solution )
+
+#%%
+
+_, board = crook()
+print_board( board )

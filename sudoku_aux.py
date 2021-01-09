@@ -7,13 +7,14 @@ Created on Mon Nov  2 13:11:50 2020
 """
 
 import numpy as np
+import cv2 as cv
 from itertools import combinations
 
 '''
 Function to use in a script
 '''
 
-def print_board( board ):
+def print_board( board: np.array ):
     '''
     Prints the board.
 
@@ -27,14 +28,27 @@ def print_board( board ):
     None.
 
     '''
-    for row in range(9):
-        print( board[row,:])
+    
+    line_width = 7 
+    h_line = np.zeros( (line_width, (128*9) + (10*line_width) ), dtype = np.uint8 )
+    v_line = np.zeros( (128, line_width), dtype = np.uint8 )
+    img = np.copy( h_line )
+    for i in range(9):
+        row = np.copy( v_line )
+        for j in range(9):
+            number = cv.imread( './Numbers/' + str( board[i,j] ) + '.png', cv.IMREAD_GRAYSCALE )
+            row = np.hstack( ( row, number, v_line ) )
+        row = np.vstack( ( row, h_line ) )
+        img = np.vstack( ( img, row ) )
+    cv.imshow( 'Board', cv.resize( img, (400,400) ) )
+    cv.waitKey()
+    cv.destroyAllWindows()
 
 '''
 Function used in both 'backtrack_solver' and 'crooks_solver'
 '''
     
-def first_check( board ):
+def first_check( board: np.array ) -> bool:
     '''
     Check if a board have repeated values in any of the lines, columns or squares
 
@@ -68,7 +82,7 @@ def first_check( board ):
                 return( False )
     return( True )
 
-def get_box( board, index ):
+def get_box( board: np.array, index: tuple ) -> np.array:
     '''
     Provides the indexes of the 3x3 square for the corresponding index
 
@@ -91,7 +105,7 @@ def get_box( board, index ):
 Function used only by the backtrack_solver
 '''
 
-def get_zeros( board, shuffle=True):
+def get_zeros( board: np.array, shuffle: bool = True):
     indexes = np.array(np.where( board == 0))
     if indexes.size == 0:
         return( np.array([[],[]]))
@@ -104,7 +118,7 @@ def get_zeros( board, shuffle=True):
 Functions used only by the crooks_solver
 '''
 
-def get_markup( board ):
+def get_markup( board: np.array ) -> list:
     '''
     Provides the initial markup, looking only for values that are already in 
     the same row, column or box
@@ -141,7 +155,7 @@ def get_markup( board ):
 
     return( markup )
 
-def get_solution( markup ):
+def get_solution( markup: list ) -> np.array:
     '''
     Provides the solution based on the current markup. If the cell markup is
     empty, returns -1, if it is a singleton (it is solved) returns this value,
@@ -175,9 +189,9 @@ def get_solution( markup ):
             #If it has more than 1 values, returns 0
             else:
                 solution[ row, col ] = 0
-    return( np.array(solution) )
+    return( solution )
 
-def preemptive_markup( markup, solution, prev_solution ):
+def preemptive_markup( markup: list, solution: np.array, prev_solution: np.array ) -> list:
     '''
     Loops through every possible row, column and box and every possible 
     combination of 2 to 8 indexes and check if we have a preemptive set. If so,
@@ -256,7 +270,7 @@ def preemptive_markup( markup, solution, prev_solution ):
 
     return( markup, solution, prev_solution )
 
-def check_preemptive( marks, index_in ):
+def check_preemptive( marks: np.array, index_in: np.array ) -> (bool, np.array):
     '''
     Check if the set of 'marks' given by 'index_in' is as preemptive set, that
     is, if the union of the values in these indexes has the same amount of
@@ -310,7 +324,7 @@ def check_preemptive( marks, index_in ):
     else:
         return( True, new_marks )
 
-def update_singletons( markup, solution, prev_solution ):
+def update_singletons( markup: list, solution: np.array, prev_solution: np.array ) -> (list, np.array, np.array):
     '''
      Update the markup and solutions considering only the new singletons.  
 
@@ -359,7 +373,7 @@ def update_singletons( markup, solution, prev_solution ):
         
     return( markup, solution, prev_solution )
 
-def update_markup( index, value, markup ):
+def update_markup( index: tuple, value: int, markup: list ) -> list:
     '''
     Sets the value for index as value, updating the markup accordingly
 
@@ -399,3 +413,96 @@ def update_markup( index, value, markup ):
     markup[ index ] = [ value ]
 
     return( markup )
+
+'''
+Functions used in sudoku_reader.py
+'''
+
+def normalize_cell( cell: np.array ) -> np.array:
+    '''
+    Resize the digit image so it has height 30, apply otsu's algorithm for 
+    binarization and fill with white columns until the image has width 60.
+
+    Parameters
+    ----------
+    cell : np.array
+        IMAGE OF THE DIGIT IN THE CELL.
+
+    Returns
+    -------
+    normalized : NUMPY ARRAY
+        30x60 IMAGE, THE DIGIT TO THE LEFT.
+    '''
+    
+    height, width = cell.shape
+    target_height = 30
+    target_width = 60
+    ratio = target_height/height
+    cell = cv.resize( cell, ( int( width*ratio), target_height ) )
+    cell = cv.GaussianBlur( cell, (7,7), 1 )
+    cell = otsu( cell )
+    width = cell.shape[1]
+    ncols = target_width-width
+    fill = np.ones( (target_height, ncols) )*255    
+    return( np.hstack( (cell, fill) ) )
+
+def otsu( img: np.array ) -> np.array:
+    '''
+    APPLY oTSU'S ALGORITHM FOR BINARIZATON OF THE IMAGE'
+
+    Parameters
+    ----------
+    img : np.array
+        ORIGINAL IMAGE.
+
+    Returns
+    -------
+    new_img : np.array
+        BINARY IMAGE
+    '''
+    
+    old_max = 0
+    cut = 0
+    for i in range(1,256):
+        class_1 = img[ img < i ]
+        class_2 = img[ img >= i]
+        prob_1 = class_1.size/img.size
+        mean_1 = np.average( class_1 )
+        mean_2 = np.average( class_2 )
+        maximize = prob_1*(1-prob_1)*((mean_1-mean_2)**2)
+        if maximize > old_max:
+           cut = i
+           old_max = maximize
+    new_img = np.copy(img)
+    new_img[ img < cut ] = 0 
+    new_img[ img >= cut ] = 255
+    return( new_img )
+
+def order_corners( corners: np.array ) -> np.array:
+    '''
+    Takes the coordinates of the corners of a square in any order and order
+    them in clockwise order, starting from the top left.
+
+    Parameters
+    ----------
+    corners : NUMPY ARRAY
+        CORNER COORDINATES AS GIVEN BY OPENCV approxPoly FUNCTION.
+
+    Returns
+    -------
+    ordered: NUMPY ARRAY
+        A 4X2 NUMPY ARRAY, EACH LINE BEING THE COORDINATE OF ONE OF THE CORNERS
+    '''
+    
+    corners = np.array( corners[:,0,:] )
+    index = np.argmin( np.sum( corners, axis = 1 ) )
+    top_left = corners[ index ]
+    corners = np.delete( corners, index, axis = 0 )
+    index = np.argmax( np.sum( corners, axis = 1 ) )
+    bottom_right = corners[ index ]
+    corners = np.delete( corners, index, axis = 0 )
+    index = np.argmin( corners[ :, 1]-top_left[1] )
+    top_right = corners[ index ]
+    corners = np.delete( corners, index, axis=0 )
+    bottom_left = corners[0]
+    return( np.float32( [ top_left, top_right, bottom_right, bottom_left ]))
