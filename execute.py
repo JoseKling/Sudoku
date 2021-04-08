@@ -35,11 +35,11 @@ def input_int(prompt, range_vals):
                 incorrect = True
     return(choice)
 
-choice = input_int('Choose one of the options:\n'
-                   '1 - Read the board from the camera.\n'
-                   '2 - Read the board from an image file.\n'
-                   '3 - Manually provide the values in the board.\n'
-                   '4 - Generate a random sudoku board (takes some time).\n'
+choice = input_int('Choose one of the options:\n' +
+                   '1 - Read the board from the camera.\n' +
+                   '2 - Read the board from an image file.\n' +
+                   '3 - Manually provide the values in the board.\n' +
+                   '4 - Generate a random sudoku board (takes some time).\n' +
                    '5 - Exit.', (1,4))
     
 #Exceptions?
@@ -63,7 +63,7 @@ elif choice == 2:
     
 elif choice == 3:
     board = np.zeros((9,9), dtype = int)
-    print('Type each number in the board, starting from the top left cell and'
+    print('Type each number in the board, starting from the top left cell and' +
           ' going down row by row. Type "0" or leave it blank for blank cells.')
     for line in range(9):
         for row in range(9):
@@ -83,9 +83,9 @@ elif choice == 4:
 else:
     exit()
 
-choice = input_int('Choose one of the options:\n'
-               '1 - Solve the board.\n'
-               '2 - Correct errors in the board before solving.\n'
+choice = input_int('Choose one of the options:\n' +
+               '1 - Solve the board.\n' +
+               '2 - Correct errors in the board before solving.\n' +
                '3 - Exit.', (1,3))
 
 if choice == 3:
@@ -105,4 +105,3 @@ elif choice == 2:
 solution = crook(board)
 print_board(solution)
 exit()
-            
