@@ -23,7 +23,7 @@ def input_int(prompt, range_vals):
         choice = input(prompt)
         incorrect = False
         try:
-            int(choice)
+            choice = int(choice)
         except:
             print('Must be an integer from {} to {}'
                   .format(range_vals[0], range_vals[1]))
@@ -35,12 +35,14 @@ def input_int(prompt, range_vals):
                 incorrect = True
     return(choice)
 
+#%% Script
+
 choice = input_int('Choose one of the options:\n' +
                    '1 - Read the board from the camera.\n' +
                    '2 - Read the board from an image file.\n' +
                    '3 - Manually provide the values in the board.\n' +
                    '4 - Generate a random sudoku board (takes some time).\n' +
-                   '5 - Exit.', (1,4))
+                   '5 - Exit.\n', (1,5))
     
 #Exceptions?
 if choice == 1:
@@ -57,7 +59,7 @@ if choice == 1:
     print_board(board)
     
 elif choice == 2:
-    path = input('What is the complete path to the image?')
+    path = input('What is the complete path to the image?\n')
     board = board_from_img(path)
     print_board(board)
     
@@ -67,7 +69,7 @@ elif choice == 3:
           ' going down row by row. Type "0" or leave it blank for blank cells.')
     for line in range(9):
         for row in range(9):
-            cell = input_int('What is the number in cell at row {} and column {}'
+            cell = input_int('What is the number in cell at row {} and column {}?\n'
                          .format(line+1, row+1), (1,9))
             if cell == '':
                 cell = 0
@@ -86,22 +88,21 @@ else:
 choice = input_int('Choose one of the options:\n' +
                '1 - Solve the board.\n' +
                '2 - Correct errors in the board before solving.\n' +
-               '3 - Exit.', (1,3))
+               '3 - Exit.\n', (1,3))
 
 if choice == 3:
     exit()
 elif choice == 2:
     again = True
     while again:
-        row = input_int('What is the row of the incorrect cell?', (1,9))
-        col = input_int('What is the column of the incorrect cell?', (1,9))
-        value = input_int('What is the correct value?', (1,9))
+        row = input_int('What is the row of the incorrect cell?\n', (1,9))
+        col = input_int('What is the column of the incorrect cell?\n', (1,9))
+        value = input_int('What is the correct value?\n', (1,9))
         board[row-1, col-1] = value
         print_board(board)
-        again = input_int('Is there any other incorrect value? (0-yes, 1-no)', (0,1))
+        again = input_int('Is there any other incorrect value? (0-yes, 1-no)\n', (0,1))
         if again == 1:
             again = False
         
-solution = crook(board)
+check, solution = crook(board)
 print_board(solution)
-exit()

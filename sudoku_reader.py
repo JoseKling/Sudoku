@@ -45,7 +45,10 @@ def board_from_img( img_path: str ) -> np.array:
     '''
     
     #Loads the image
-    img = cv.imread( img_path, cv.IMREAD_GRAYSCALE )
+    try:
+        img = cv.imread( img_path, cv.IMREAD_GRAYSCALE )
+    except:
+        raise Exception('Could not read image file. Check if path to file is correct.')
     #Crops the image to get only the board
     board_img = extract_board( img )
     #Returns a list of images from the numbers in the cells
@@ -186,6 +189,8 @@ def read_digits( cells: np.array ) -> np.array:
     model.fit( features, labels )
     #We need only to predict the non empty cells, so we need their indexes
     non_empty = np.where( np.any( cells != 0, axis=1 ) )
+    if len(non_empty[0])==0:
+        raise Exception('Could not read board. All cells were read as empty.')
     board = np.zeros( 81, dtype = int )
     #Get the model prediction
     board[ non_empty ] = model.predict( cells[ non_empty ] )

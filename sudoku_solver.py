@@ -33,6 +33,7 @@ IDEAS:
 
 import numpy as np
 from sudoku_aux import *
+
 #%% Functions
        
 def crook( board: np.array = np.zeros( (9,9), dtype = int ) ) -> (bool, np.array):
@@ -244,5 +245,6 @@ def backtrack( board: np.array = np.zeros( (9,9), dtype = int ) ) -> (bool, np.a
 
 #%%
 
-_, board = crook()
-print_board( board )
+if __name__ == '__main__':
+    _, board = crook()
+    print_board( board )

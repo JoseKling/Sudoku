@@ -30,15 +30,21 @@ def print_board( board: np.array ):
     '''
     
     line_width = 7 
-    h_line = np.zeros( (line_width, (128*9) + (10*line_width) ), dtype = np.uint8 )
+    h_line = np.zeros( (line_width, (128*9) + (12*line_width) ), dtype = np.uint8 )
     v_line = np.zeros( (128, line_width), dtype = np.uint8 )
     img = np.copy( h_line )
     for i in range(9):
         row = np.copy( v_line )
         for j in range(9):
             number = cv.imread( './Numbers/' + str( board[i,j] ) + '.png', cv.IMREAD_GRAYSCALE )
-            row = np.hstack( ( row, number, v_line ) )
-        row = np.vstack( ( row, h_line ) )
+            if j%3==2 and j!=8:
+                row = np.hstack( ( row, number, v_line, v_line ) )
+            else:
+                row = np.hstack( ( row, number, v_line ) )
+        if i%3==2 and i!= 8:
+            row = np.vstack( ( row, h_line, h_line ) )
+        else:
+            row = np.vstack( ( row, h_line ) )
         img = np.vstack( ( img, row ) )
     cv.imshow( 'Board', cv.resize( img, (400,400) ) )
     cv.waitKey()
